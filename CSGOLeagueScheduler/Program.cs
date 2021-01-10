@@ -69,10 +69,8 @@ namespace CSGOLeagueScheduler
         public static void Solve(int n, int totalNumberWeeks, string[] preScheduledWeekExpr)
         {
             var league = new League(n, totalNumberWeeks, preScheduledWeekExpr);
+            league.GenerateSchedules();
             league.DisplaySchedules();
-
-            //league.GenerateSchedules();
-            //league.DisplaySchedules();
 
             // Only for testing
             var expr = league.GenerateStringExpression();
@@ -182,7 +180,7 @@ namespace CSGOLeagueScheduler
             private readonly int _totalNrOfWeeks;
             private readonly int _k;
             private readonly int _numOfMatchesPerWeek;
-            private readonly int[] _allTeamIDs;
+            private readonly int[] _allTeamsIDs;
 
             private List<Match> _preScheduledMatches;
 
@@ -201,7 +199,7 @@ namespace CSGOLeagueScheduler
 
                 _preScheduledStringExpressions = preScheduledStringExpressions;
                 _n = n;
-                _allTeamIDs = Enumerable.Range(1, _n).ToArray();
+                _allTeamsIDs = Enumerable.Range(1, _n).ToArray();
                 _k = preScheduledStringExpressions.Length;
                 _totalNrOfWeeks = totalNrOfWeeks;
                 _numOfMatchesPerWeek = _n / 2;
@@ -210,47 +208,51 @@ namespace CSGOLeagueScheduler
                 ReserveSchedules();
             }
 
+            /// <summary>
+            /// Generate the new schedules
+            /// </summary>
             public void GenerateSchedules()
             {
                 //Using round robin algorithm to generate all possible matches
 
-                // matches that are possible to be scheduled
+                // teamIDs that are possible to be scheduled
                 List<int> toBeScheduled = new List<int>();
                 List<Match> matchesThatCanBeScheduled = new List<Match>();
 
-                toBeScheduled.AddRange(_allTeamIDs.Skip(_numOfMatchesPerWeek).Take(_numOfMatchesPerWeek));
-                toBeScheduled.AddRange(_allTeamIDs.Skip(1).Take(_numOfMatchesPerWeek - 1).ToArray().Reverse());
+                toBeScheduled.AddRange(_allTeamsIDs.Skip(_numOfMatchesPerWeek).Take(_numOfMatchesPerWeek));
+                toBeScheduled.AddRange(_allTeamsIDs.Skip(1).Take(_numOfMatchesPerWeek - 1).ToArray().Reverse());
 
                 int toBeScheduledCount = toBeScheduled.Count;
 
+                // here get all the posible schedules and add them to matchesThatCanBeScheduled List
                 for (int week = 0; week < _totalNrOfWeeks; week++)
                 {
                     int teamIdx = week % toBeScheduledCount;
 
-                    matchesThatCanBeScheduled.Add(new Match(toBeScheduled[teamIdx], _allTeamIDs[0]));
+                    matchesThatCanBeScheduled.Add(new Match(toBeScheduled[teamIdx], _allTeamsIDs[0]));
 
                     for (int idx = 1; idx < _numOfMatchesPerWeek; idx++)
                     {
-                        int firstTeam = (week + idx) % toBeScheduledCount;
-                        int secondTeam = (week + toBeScheduledCount - idx) % toBeScheduledCount;
-                        matchesThatCanBeScheduled.Add(new Match(toBeScheduled[firstTeam], toBeScheduled[secondTeam]));
+                        int firstTeamIdx = (week + idx) % toBeScheduledCount;
+                        int secondTeamIdx = (week + toBeScheduledCount - idx) % toBeScheduledCount;
+                        matchesThatCanBeScheduled.Add(new Match(toBeScheduled[firstTeamIdx], toBeScheduled[secondTeamIdx]));
                     }
                 }
 
-                // from matches that can be scheduled, we remove the matches that were pre-scheduled
-                var toBe = matchesThatCanBeScheduled.Except(_preScheduledMatches).ToList();
+                // from matchesThatCanBeScheduled we remove the matches that were pre-scheduled and get the remaining schedules
+                var remainingMatches = matchesThatCanBeScheduled.Except(_preScheduledMatches).ToList();
 
                 int matchCount = 0;
                 int weekCount = _k - 1;
-                foreach (var item in toBe)
+                foreach (var match in remainingMatches)
                 {
-                    if (matchCount % this._numOfMatchesPerWeek == 0)
+                    if (matchCount % _numOfMatchesPerWeek == 0)
                     {
                         ++weekCount;
-                        Weeks[weekCount] = new Week(this._numOfMatchesPerWeek);
+                        Weeks[weekCount] = new Week(_numOfMatchesPerWeek);
                         matchCount = 0;
                     }
-                    Weeks[weekCount].Matches[matchCount] = item;
+                    Weeks[weekCount].Matches[matchCount] = match;
 
                     ++matchCount;
                 }
@@ -273,7 +275,7 @@ namespace CSGOLeagueScheduler
                     {
                         ++weekCount;
                         Console.WriteLine();
-                        Console.WriteLine($"Week {weekCount} -----------------------------------------------");
+                        Console.WriteLine($"{new string('-', 14)} Week {weekCount} {new string('-', 15)}");
                     }
                     ++matchCount;
                     Console.WriteLine($"\t{match}");
