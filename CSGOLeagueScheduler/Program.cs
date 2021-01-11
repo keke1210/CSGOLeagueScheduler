@@ -159,7 +159,7 @@ namespace CSGOLeagueScheduler
                 {
                     var match = x.Split(':');
 
-                    if (match[0].IsEmptyNullOrString() || match[1].IsEmptyNullOrString())
+                    if (match[0].IsEmptyNullOrWhitespace() || match[1].IsEmptyNullOrWhitespace())
                         throw new ArgumentNullException($"Bad Inputon match expression: {match}");
 
                     var t1 = Convert.ToInt32(match[0]);
