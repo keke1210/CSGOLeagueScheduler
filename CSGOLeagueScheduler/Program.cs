@@ -182,7 +182,7 @@ namespace CSGOLeagueScheduler
             private readonly int _numOfMatchesPerWeek;
             private readonly int[] _allTeamsIDs;
 
-            private List<Match> _preScheduledMatches;
+            private IList<Match> _preScheduledMatches;
 
             public Week[] Weeks { get; }
 
@@ -216,8 +216,8 @@ namespace CSGOLeagueScheduler
                 //Using round robin algorithm to generate all possible matches
 
                 // teamIDs that are possible to be scheduled
-                List<int> toBeScheduled = new List<int>();
-                List<Match> matchesThatCanBeScheduled = new List<Match>();
+                var toBeScheduled = new List<int>();
+                var matchesThatCanBeScheduled = new List<Match>();
 
                 toBeScheduled.AddRange(_allTeamsIDs.Skip(_numOfMatchesPerWeek).Take(_numOfMatchesPerWeek));
                 toBeScheduled.AddRange(_allTeamsIDs.Skip(1).Take(_numOfMatchesPerWeek - 1).ToArray().Reverse());
@@ -361,7 +361,7 @@ namespace CSGOLeagueScheduler
 
     public static class StringExtensions
     {
-        public static bool IsEmptyNullOrString(this string str)
+        public static bool IsEmptyNullOrWhitespace(this string str)
                 => string.IsNullOrWhiteSpace(str) || str == string.Empty;
     }
 }
