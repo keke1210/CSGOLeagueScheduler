@@ -78,14 +78,6 @@ namespace CSGOLeagueScheduler
             Console.WriteLine(expr);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="n">number of teams</param>
-        /// <param name="totalNumberWeeks"></param>
-        /// <param name="preScheduledWeekExpr"></param>
-        /// <param name="k">number of prescheduled weeks</param>
-
         // Note: I used struct instead of record because I needed to override the default implementation of IEquatable
         public struct Match : IEquatable<Match>
         {
